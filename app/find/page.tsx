@@ -2,7 +2,7 @@
 
 import { Poppins } from "next/font/google";
 import { FormEvent, useRef, useState } from "react";
-import { IconCopy, IconSearch } from "../components/icon";
+import { IconCopy, IconSearch } from "../../components/icon";
 import Loading from "../components/Loading";
 import Output from "../components/QR";
 import { ServerData } from "../utils/ServerData";

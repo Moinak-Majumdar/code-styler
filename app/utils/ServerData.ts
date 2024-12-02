@@ -3,12 +3,11 @@ class ServerData {
     private uri: string;
     private revalidate: number;
 
-    constructor(params: { path: string, revalidate?: number }) {
-        const db = process.env.NEXT_PUBLIC_TEST_DB;
+    constructor(params: { path: string, revalidate?: number, testDb: boolean }) {
         const server = process.env.NEXT_PUBLIC_SERVER;
         const admin = process.env.NEXT_PUBLIC_DB_ADMIN;
 
-        this.uri = `${server}/${params.path}?testDb=${db}&dbAdmin=${admin}`
+        this.uri = `${server}/${params.path}?testDb=${params.testDb}&dbAdmin=${admin}`
         this.revalidate = params.revalidate ?? 3600;
     }
 

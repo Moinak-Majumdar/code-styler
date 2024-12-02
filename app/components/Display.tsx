@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react';
 import { Poppins } from "next/font/google";
+import { useEffect, useState } from 'react';
 const poppins = Poppins({ display: 'swap', weight: ['400', '500', '600', '700'], subsets: ['latin'] });
 
 const Display = (props: { htmlContent: string }) => {
@@ -27,7 +27,7 @@ const Display = (props: { htmlContent: string }) => {
 
 
     return (
-        <div className="relative bg-white min-h-full w-full">
+        <div className="relative dark:bg-[#000011] bg-white min-h-full w-full rounded-md border border-slate-800 dark:border-slate-500">
             <iframe
                 className={poppins.className}
                 srcDoc={frame}
