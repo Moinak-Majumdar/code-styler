@@ -8,7 +8,7 @@ const Token = async ({ params }: { params: { token: string } }) => {
     const { token } = params
     let loading = true
 
-    const server = new ServerData({ path: 'getTailwindPlay' })
+    const server = new ServerData({ path: 'getTailwindPlay', testDb: true })
     const res = await server.request({ body: { token: token.toUpperCase() } })
 
     if (!res.ok) {

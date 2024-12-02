@@ -33,7 +33,7 @@ const Find = () => {
         } else {
             setLoading(true);
             try {
-                const server = new ServerData({ path: 'getTailwindPlay' })
+                const server = new ServerData({ path: 'getTailwindPlay', testDb: true })
 
                 const res = await server.request({ body: { token: value } })
 
