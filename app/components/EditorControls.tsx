@@ -53,7 +53,7 @@ const EditorControls = (props: EditorControlsProps) => {
             const testDb = formData.get('testDb') === 'on'
             const accessKey = formData.get('accessKey')
 
-            const server = new ServerData({ path: 'addTailwindPlay', testDb })
+            const server = new ServerData({ path: 'upsertTailwindPlay', testDb })
 
             const res = await server.request({ body: { html: props.editorContent, token: searchedToken, accessKey } })
 
