@@ -18,17 +18,14 @@ import Loading from './Loading'
 const EditorControls = (props: EditorControlsProps) => {
 
     const [loading, setLoading] = useState<boolean>(false);
-    const [findByTokenModal, setFindByTokenModal] = useState<boolean>(false)
-    const [uploadModal, setUploadModal] = useState<boolean>(false)
+    const [findByTokenModalOpen, toggleFindByTokenModalOpen] = useState<boolean>(false)
+    const [uploadModalOpen, toggleUploadModalOpen] = useState<boolean>(false)
     const [searchedToken, setSearchedToken] = useState<string>('')
 
 
     const router = useRouter()
 
-
-    async function handelUpload(e: FormEvent) {
-        e.preventDefault()
-        setUploadModal(false)
+    const openUploadModal = () => {
         if (!!!props.editorContent) {
             toast('Error ⚠️', {
                 description: 'HTML content is missing.',
@@ -38,8 +35,15 @@ const EditorControls = (props: EditorControlsProps) => {
                 },
                 position: 'bottom-left'
             })
-            return;
+        } else {
+            toggleUploadModalOpen(true)
         }
+    }
+
+
+    async function handelUpload(e: FormEvent) {
+        e.preventDefault()
+        toggleUploadModalOpen(false)
         setLoading(true)
 
         const form = e.target as HTMLFormElement
@@ -71,7 +75,7 @@ const EditorControls = (props: EditorControlsProps) => {
     async function findByToken(e: FormEvent) {
         e.preventDefault();
         setLoading(true);
-        setFindByTokenModal(false);
+        toggleFindByTokenModalOpen(false);
 
 
         const form = e.target as HTMLFormElement
@@ -142,7 +146,7 @@ const EditorControls = (props: EditorControlsProps) => {
                 <TooltipProvider>
                     <div className="mt-4 flex justify-between px-4 w-full">
                         <Tooltip>
-                            <TooltipTrigger disabled={loading} type="button" onClick={() => setFindByTokenModal(true)}>
+                            <TooltipTrigger disabled={loading} type="button" onClick={() => toggleFindByTokenModalOpen(true)}>
                                 <Search />
                             </TooltipTrigger>
                             <TooltipContent>Find By TOKEN</TooltipContent>
@@ -184,7 +188,7 @@ const EditorControls = (props: EditorControlsProps) => {
                                 </AlertDialogContent>
                             </AlertDialog>
                             <Tooltip>
-                                <TooltipTrigger disabled={loading} onClick={() => setUploadModal(true)}>
+                                <TooltipTrigger disabled={loading} onClick={openUploadModal}>
                                     <Save />
                                 </TooltipTrigger>
                                 <TooltipContent>Upload</TooltipContent>
@@ -192,7 +196,7 @@ const EditorControls = (props: EditorControlsProps) => {
                         </div>
                     </div>
                 </TooltipProvider >
-                <Dialog open={findByTokenModal} onOpenChange={setFindByTokenModal}>
+                <Dialog open={findByTokenModalOpen} onOpenChange={toggleFindByTokenModalOpen}>
                     <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
                             <DialogTitle>Tailwind Play</DialogTitle>
@@ -217,7 +221,7 @@ const EditorControls = (props: EditorControlsProps) => {
                         </form>
                     </DialogContent>
                 </Dialog>
-                <Dialog open={uploadModal} onOpenChange={setUploadModal}>
+                <Dialog open={uploadModalOpen} onOpenChange={toggleUploadModalOpen}>
                     <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
                             <DialogTitle>Tailwind Play</DialogTitle>
