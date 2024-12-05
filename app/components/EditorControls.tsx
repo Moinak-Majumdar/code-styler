@@ -1,5 +1,6 @@
 'use client'
 
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -27,6 +28,7 @@ const EditorControls = (props: EditorControlsProps) => {
 
     async function handelUpload(e: FormEvent) {
         e.preventDefault()
+        setUploadModal(false)
         if (!!!props.editorContent) {
             toast('Error ⚠️', {
                 description: 'HTML content is missing.',
@@ -45,8 +47,11 @@ const EditorControls = (props: EditorControlsProps) => {
             const formData = new FormData(form)
 
             const testDb = formData.get('testDb') === 'on'
-            const server = new ServerData({ path: 'addTailwindPlay', testDb})
-            const res = await server.request({ body: { html: props.editorContent, token: searchedToken } })
+            const accessKey = formData.get('accessKey')
+
+            const server = new ServerData({ path: 'addTailwindPlay', testDb })
+
+            const res = await server.request({ body: { html: props.editorContent, token: searchedToken, accessKey } })
 
             const json = await res.json()
 
@@ -56,7 +61,7 @@ const EditorControls = (props: EditorControlsProps) => {
                     position: 'bottom-left'
                 })
             } else {
-                router.push(`/find/${json['token']}`)
+                router.push(`/find/${json['token']}?testDb=${testDb}`)
             }
             setLoading(false)
         }
@@ -66,6 +71,8 @@ const EditorControls = (props: EditorControlsProps) => {
     async function findByToken(e: FormEvent) {
         e.preventDefault();
         setLoading(true);
+        setFindByTokenModal(false);
+
 
         const form = e.target as HTMLFormElement
         if (form) {
@@ -142,32 +149,49 @@ const EditorControls = (props: EditorControlsProps) => {
                         </Tooltip>
                         <div className="flex gap-4">
                             <Tooltip>
-                                <TooltipTrigger disabled={loading} type="button" onClick={handelFormat}>
-                                    <LetterText />
+                                <TooltipTrigger disabled={loading || props.editorContent.trim() === ''} onClick={props.onView} className='disabled:cursor-not-allowed'>
+                                    <Eye />
                                 </TooltipTrigger>
-                                <TooltipContent>Format Code</TooltipContent>
+                                <TooltipContent>Preview</TooltipContent>
                             </Tooltip>
                             <Tooltip>
-                                <TooltipTrigger disabled={loading} type="button" onClick={handelReset}>
-                                    <ListRestart />
+                                <TooltipTrigger onClick={handelFormat} disabled={loading} type="button">
+                                    <LetterText />
+                                    <TooltipContent>Format Code</TooltipContent>
                                 </TooltipTrigger>
-                                <TooltipContent>Reset code</TooltipContent>
                             </Tooltip>
+                            <AlertDialog>
+                                <Tooltip>
+                                    <TooltipTrigger disabled={loading} type="button">
+                                        <AlertDialogTrigger asChild>
+                                            <ListRestart />
+                                        </AlertDialogTrigger>
+                                    </TooltipTrigger>
+                                    <TooltipContent>Reset code</TooltipContent>
+                                </Tooltip>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This action cannot be undone. This will permanently delete your
+                                            html editor code.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={handelReset}>Continue</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
                             <Tooltip>
                                 <TooltipTrigger disabled={loading} onClick={() => setUploadModal(true)}>
                                     <Save />
                                 </TooltipTrigger>
                                 <TooltipContent>Upload</TooltipContent>
                             </Tooltip>
-                            <Tooltip>
-                                <TooltipTrigger disabled={loading} onClick={props.onView}>
-                                    <Eye />
-                                </TooltipTrigger>
-                                <TooltipContent>Preview</TooltipContent>
-                            </Tooltip>
                         </div>
                     </div>
-                </TooltipProvider>
+                </TooltipProvider >
                 <Dialog open={findByTokenModal} onOpenChange={setFindByTokenModal}>
                     <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
@@ -179,13 +203,11 @@ const EditorControls = (props: EditorControlsProps) => {
                         <form onSubmit={findByToken}>
                             <div className="grid gap-4 py-4">
                                 <div className="grid grid-cols-4 items-center gap-4">
-                                    <Switch name='testDb' id="testDb" className='ml-auto' />
+                                    <Switch name='testDb' id="testDb" className='ml-auto' checked={true} />
                                     <Label htmlFor="testDb" className='col-span-3'>Use Test Db</Label>
                                 </div>
                                 <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="token" className="text-right">
-                                        Token
-                                    </Label>
+                                    <Label htmlFor="token" className="text-right">Token</Label>
                                     <Input required name='token' id="token" placeholder='TOKEN' className="col-span-3" />
                                 </div>
                             </div>
@@ -206,8 +228,12 @@ const EditorControls = (props: EditorControlsProps) => {
                         <form onSubmit={handelUpload}>
                             <div className="grid gap-4 py-4">
                                 <div className="grid grid-cols-4 items-center gap-4">
-                                    <Switch name='testDb' id="testDb" className='ml-auto' />
+                                    <Switch name='testDb' id="testDb" className='ml-auto' checked={true} />
                                     <Label htmlFor="testDb" className='col-span-3'>Use Test Db</Label>
+                                </div>
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="accessKey" className='text-right'>Access Key</Label>
+                                    <Input id='accessKey' name='accessKey' placeholder='Access Key' type='text' required className='col-span-3' />
                                 </div>
                             </div>
                             <DialogFooter>
