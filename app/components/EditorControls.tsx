@@ -50,10 +50,10 @@ const EditorControls = (props: EditorControlsProps) => {
         if (form) {
             const formData = new FormData(form)
 
-            const testDb = formData.get('testDb') === 'on'
+            const prodDb = formData.get('prodDb') === 'on'
             const accessKey = formData.get('accessKey')
 
-            const server = new ServerData({ path: 'upsertTailwindPlay', testDb })
+            const server = new ServerData({ path: 'upsertTailwindPlay', testDb: !prodDb })
 
             const res = await server.request({ body: { html: props.editorContent, token: searchedToken, accessKey } })
 
@@ -65,7 +65,7 @@ const EditorControls = (props: EditorControlsProps) => {
                     position: 'bottom-left'
                 })
             } else {
-                router.push(`/find/${json['token']}?testDb=${testDb}`)
+                router.push(`/find/${json['token']}?tesDb=${!prodDb}`)
             }
             setLoading(false)
         }
@@ -82,11 +82,11 @@ const EditorControls = (props: EditorControlsProps) => {
         if (form) {
             const formData = new FormData(form)
 
-            const testDb = formData.get('testDb') === 'on'
+            const prodDb = formData.get('prodDb') === 'on'
             const token = formData.get('token')
 
             try {
-                const server = new ServerData({ path: 'getTailwindPlay', testDb })
+                const server = new ServerData({ path: 'getTailwindPlay', testDb: !prodDb })
                 const res = await server.request({ body: { token } })
 
                 const json = await res.json();
@@ -147,7 +147,7 @@ const EditorControls = (props: EditorControlsProps) => {
                     <div className="mt-4 flex justify-between px-4 w-full">
                         <Tooltip>
                             <TooltipTrigger disabled={loading} type="button" onClick={() => toggleFindByTokenModalOpen(true)}>
-                                <Search />
+                                <Search className='hover:text-primary'/>
                             </TooltipTrigger>
                             <TooltipContent>Find By TOKEN</TooltipContent>
                         </Tooltip>
@@ -160,7 +160,7 @@ const EditorControls = (props: EditorControlsProps) => {
                             </Tooltip>
                             <Tooltip>
                                 <TooltipTrigger onClick={handelFormat} disabled={loading} type="button">
-                                    <LetterText />
+                                    <LetterText  className='hover:text-primary'/>
                                     <TooltipContent>Format Code</TooltipContent>
                                 </TooltipTrigger>
                             </Tooltip>
@@ -168,7 +168,7 @@ const EditorControls = (props: EditorControlsProps) => {
                                 <Tooltip>
                                     <TooltipTrigger disabled={loading} type="button">
                                         <AlertDialogTrigger asChild>
-                                            <ListRestart />
+                                            <ListRestart className='hover:text-primary'/>
                                         </AlertDialogTrigger>
                                     </TooltipTrigger>
                                     <TooltipContent>Reset code</TooltipContent>
@@ -189,7 +189,7 @@ const EditorControls = (props: EditorControlsProps) => {
                             </AlertDialog>
                             <Tooltip>
                                 <TooltipTrigger disabled={loading} onClick={openUploadModal}>
-                                    <Save />
+                                    <Save className='hover:text-primary' />
                                 </TooltipTrigger>
                                 <TooltipContent>Upload</TooltipContent>
                             </Tooltip>
@@ -207,8 +207,8 @@ const EditorControls = (props: EditorControlsProps) => {
                         <form onSubmit={findByToken}>
                             <div className="grid gap-4 py-4">
                                 <div className="grid grid-cols-4 items-center gap-4">
-                                    <Switch name='testDb' id="testDb" className='ml-auto' checked={true} />
-                                    <Label htmlFor="testDb" className='col-span-3'>Use Test Db</Label>
+                                    <Switch name='prodDb' id="prodDb" className='ml-auto' />
+                                    <Label htmlFor="prodDb" className='col-span-3'>Use Prod Db</Label>
                                 </div>
                                 <div className="grid grid-cols-4 items-center gap-4">
                                     <Label htmlFor="token" className="text-right">Token</Label>
@@ -232,8 +232,8 @@ const EditorControls = (props: EditorControlsProps) => {
                         <form onSubmit={handelUpload}>
                             <div className="grid gap-4 py-4">
                                 <div className="grid grid-cols-4 items-center gap-4">
-                                    <Switch name='testDb' id="testDb" className='ml-auto' checked={true} />
-                                    <Label htmlFor="testDb" className='col-span-3'>Use Test Db</Label>
+                                    <Switch name='prodDb' id="prodDb" className='ml-auto' />
+                                    <Label htmlFor="prodDb" className='col-span-3'>Use Prod Db</Label>
                                 </div>
                                 <div className="grid grid-cols-4 items-center gap-4">
                                     <Label htmlFor="accessKey" className='text-right'>Access Key</Label>

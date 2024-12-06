@@ -39,11 +39,11 @@ const Find = () => {
             const formData = new FormData(form)
 
             const token = formData.get('token')
-            const testDb = formData.get('testDb') === 'on'
+            const prodDb = formData.get('prodDb') === 'on'
 
             setLoading(true);
             try {
-                const server = new ServerData({ path: 'getTailwindPlay', testDb })
+                const server = new ServerData({ path: 'getTailwindPlay', testDb: !prodDb })
 
                 const res = await server.request({ body: { token: token } })
 
@@ -71,8 +71,8 @@ const Find = () => {
         <main className="mt-16">
             <form className="flex lg:w-1/4 w-fit mx-auto h-fit mb-8 flex-col items-start" onSubmit={findByToken}>
                 <div className="grid grid-cols-4 items-center gap-4 mb-4">
-                    <Switch name='testDb' id="testDb" className='ml-auto' checked={true} />
-                    <Label htmlFor="testDb" className='col-span-3'>Use Test Db</Label>
+                    <Switch name='prodDb' id="prodDb" className='ml-auto' />
+                    <Label htmlFor="prodDb" className='col-span-3'>Use Prod Db</Label>
                 </div>
                 <div className="flex">
                     <div className="w-full bg-slate-100 dark:bg-slate-800 rounded  border border-indigo-300 dark:border-indigo-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-indigo-800 dark:text-indigo-200 p-2 leading-6 transition-colors duration-200 ease-in-out uppercase flex items-center">

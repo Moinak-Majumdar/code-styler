@@ -3,17 +3,20 @@
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { html } from '@codemirror/lang-html';
-import { dracula } from '@uiw/codemirror-theme-dracula';
+import { andromeda } from '@uiw/codemirror-theme-andromeda';
+import { xcodeLight } from '@uiw/codemirror-theme-xcode';
 import CodeMirror, { ViewUpdate } from '@uiw/react-codemirror';
+import { useTheme } from 'next-themes';
 import { useState } from "react";
 import Display from './components/Display';
 import EditorControls from './components/EditorControls';
 
+
 const extension = [
   html({
     autoCloseTags: true,
-    selfClosingTags: true,
     matchClosingTags: true,
+    selfClosingTags: true
   })
 ]
 
@@ -22,22 +25,23 @@ export default function Home() {
 
   const [drawerOpen, toggleDrawerOpen] = useState<boolean>(false);
   const [htmlContent, setHtmlContent] = useState<string>('');
-  
+
+  const { resolvedTheme } = useTheme()
 
   return (
     <main className="flex">
-      <section>
+      <section className='w-full'>
         <CodeMirror
           value={htmlContent}
           extensions={extension}
-          theme={dracula}
+          theme={resolvedTheme === 'dark' ? andromeda : xcodeLight}
           onChange={(value: string, viewUpdate: ViewUpdate) => setHtmlContent(value)}
           height="85vh"
           width='100vw'
-          className=""
+          className="w-full"
         />
         <EditorControls
-          onSave={() => {}}
+          onSave={() => { }}
           onView={() => toggleDrawerOpen(true)}
           editorContent={htmlContent}
           setEditorContent={setHtmlContent}

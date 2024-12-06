@@ -4,7 +4,7 @@ import * as htmlParser from 'prettier/parser-html';
 interface PrettierConfig {
   parser: string;
   plugins: any[];
-  printWidth: number;
+  printWidth?: number;
   tabWidth: number;
   useTabs: boolean;
   semi: boolean;
@@ -29,9 +29,9 @@ class HtmlFormatter {
     this.config = {
       parser: 'html',
       plugins: [htmlParser],
-      printWidth: 80,
       tabWidth: 2,
       useTabs: false,
+      printWidth: 250,
       semi: true,
       singleQuote: false,
       bracketSpacing: true,
