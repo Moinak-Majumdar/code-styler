@@ -2,37 +2,32 @@
 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from '@/components/ui/drawer'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Eye, LetterText, ListRestart, Save, Search } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { FormEvent, useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
+import cssFormatter from '../utils/CssFormatter'
 import htmlFormatter from '../utils/HtmlFormatter'
-import { ServerData } from '../utils/ServerData'
+import ContentProps from '../utils/Interface/ContentProps'
+import Display from './Display'
+import { Find } from './Find'
 import Loading from './Loading'
+import SaveAndUpload from './SaveAndUpload'
+
 
 const EditorControls = (props: EditorControlsProps) => {
 
     const [loading, setLoading] = useState<boolean>(false);
-    const [findByTokenModalOpen, toggleFindByTokenModalOpen] = useState<boolean>(false)
+    const [drawerOpen, toggleDrawerOpen] = useState<boolean>(false);
+    const [findModalOpen, toggleModalOpen] = useState<boolean>(false)
     const [uploadModalOpen, toggleUploadModalOpen] = useState<boolean>(false)
     const [searchedToken, setSearchedToken] = useState<string>('')
 
-
-    const router = useRouter()
-
     const openUploadModal = () => {
-        if (!!!props.editorContent) {
+        if (props.editorContent.html.trim() === '') {
             toast('Error ⚠️', {
                 description: 'HTML content is missing.',
-                action: {
-                    label: 'close',
-                    onClick: () => { console.log('closed') }
-                },
                 position: 'bottom-left'
             })
         } else {
@@ -40,101 +35,27 @@ const EditorControls = (props: EditorControlsProps) => {
         }
     }
 
-
-    async function handelUpload(e: FormEvent) {
-        e.preventDefault()
-        toggleUploadModalOpen(false)
+    const handelFormat = async (content: ContentProps) => {
         setLoading(true)
+        try {
+            const html = await htmlFormatter(content.html)
+            const css = await cssFormatter(content.css)
 
-        const form = e.target as HTMLFormElement
-        if (form) {
-            const formData = new FormData(form)
-
-            const prodDb = formData.get('prodDb') === 'on'
-            const accessKey = formData.get('accessKey')
-
-            const server = new ServerData({ path: 'upsertTailwindPlay', testDb: !prodDb })
-
-            const res = await server.request({ body: { html: props.editorContent, token: searchedToken, accessKey } })
-
-            const json = await res.json()
-
-            if (!res.ok) {
-                toast('Api Error ⚠️', {
-                    description: json['error'],
-                    position: 'bottom-left'
-                })
-            } else {
-                router.push(`/find/${json['token']}?tesDb=${!prodDb}`)
-            }
-            setLoading(false)
+            props.setEditorContent({ html, css })
+        } catch (error) {
+            toast('Formatter error ⚠️', {
+                description: String(error),
+                position: 'bottom-left'
+            })
+            props.setEditorContent({ html: "", css: "" });
         }
-    }
-
-
-    async function findByToken(e: FormEvent) {
-        e.preventDefault();
-        setLoading(true);
-        toggleFindByTokenModalOpen(false);
-
-
-        const form = e.target as HTMLFormElement
-        if (form) {
-            const formData = new FormData(form)
-
-            const prodDb = formData.get('prodDb') === 'on'
-            const token = formData.get('token')
-
-            try {
-                const server = new ServerData({ path: 'getTailwindPlay', testDb: !prodDb })
-                const res = await server.request({ body: { token } })
-
-                const json = await res.json();
-                if (res.ok) {
-                    const html = json['html']
-
-                    htmlFormatter(html).then((res) => {
-                        props.setEditorContent(res)
-                        setSearchedToken(token as string)
-                    }).catch((err) => {
-                        toast('Api Error ⚠️', {
-                            description: err,
-                            position: 'bottom-left'
-                        })
-                        props.setEditorContent('')
-                    })
-                } else {
-                    toast('Api Error ⚠️', {
-                        description: json['error'],
-                        position: 'bottom-left'
-                    })
-                }
-            } catch (error) {
-                console.log(error)
-                toast('Api Error ⚠️', {
-                    description: 'Open console',
-                    position: 'bottom-left'
-                })
-            }
-        }
-
-        setLoading(false);
-    }
-
-    const handelFormat = async () => {
-        setLoading(true)
-        htmlFormatter(props.editorContent).then((res) => {
-            props.setEditorContent(res)
-        }).catch((err) => {
-            alert(err)
-            props.setEditorContent('')
-        })
         setLoading(false)
     }
 
+
     const handelReset = () => {
         setSearchedToken('')
-        props.setEditorContent('')
+        props.setEditorContent({ css: "", html: '' })
     }
 
 
@@ -144,23 +65,27 @@ const EditorControls = (props: EditorControlsProps) => {
         return (
             <>
                 <TooltipProvider>
-                    <div className="mt-4 flex justify-between px-4 w-full">
+                    <div className="mt-4 flex justify-between px-8 w-full">
                         <Tooltip>
-                            <TooltipTrigger disabled={loading} type="button" onClick={() => toggleFindByTokenModalOpen(true)}>
-                                <Search className='hover:text-primary'/>
+                            <TooltipTrigger disabled={loading} type="button" onClick={() => toggleModalOpen(true)}>
+                                <Search className='hover:text-primary' />
                             </TooltipTrigger>
                             <TooltipContent>Find By TOKEN</TooltipContent>
                         </Tooltip>
                         <div className="flex gap-4">
                             <Tooltip>
-                                <TooltipTrigger disabled={loading || props.editorContent.trim() === ''} onClick={props.onView} className='disabled:cursor-not-allowed'>
+                                <TooltipTrigger
+                                    disabled={loading || props.editorContent.html.trim() === ''}
+                                    onClick={() => toggleDrawerOpen(true)}
+                                    className='disabled:cursor-not-allowed'
+                                >
                                     <Eye />
                                 </TooltipTrigger>
                                 <TooltipContent>Preview</TooltipContent>
                             </Tooltip>
                             <Tooltip>
-                                <TooltipTrigger onClick={handelFormat} disabled={loading} type="button">
-                                    <LetterText  className='hover:text-primary'/>
+                                <TooltipTrigger onClick={() => handelFormat(props.editorContent)} disabled={loading} type="button">
+                                    <LetterText className='hover:text-primary' />
                                     <TooltipContent>Format Code</TooltipContent>
                                 </TooltipTrigger>
                             </Tooltip>
@@ -168,7 +93,7 @@ const EditorControls = (props: EditorControlsProps) => {
                                 <Tooltip>
                                     <TooltipTrigger disabled={loading} type="button">
                                         <AlertDialogTrigger asChild>
-                                            <ListRestart className='hover:text-primary'/>
+                                            <ListRestart className='hover:text-primary' />
                                         </AlertDialogTrigger>
                                     </TooltipTrigger>
                                     <TooltipContent>Reset code</TooltipContent>
@@ -196,56 +121,37 @@ const EditorControls = (props: EditorControlsProps) => {
                         </div>
                     </div>
                 </TooltipProvider >
-                <Dialog open={findByTokenModalOpen} onOpenChange={toggleFindByTokenModalOpen}>
-                    <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                            <DialogTitle>Tailwind Play</DialogTitle>
-                            <DialogDescription>
-                                Find html by registered token and edit in editor.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <form onSubmit={findByToken}>
-                            <div className="grid gap-4 py-4">
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Switch name='prodDb' id="prodDb" className='ml-auto' />
-                                    <Label htmlFor="prodDb" className='col-span-3'>Use Prod Db</Label>
-                                </div>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="token" className="text-right">Token</Label>
-                                    <Input required name='token' id="token" placeholder='TOKEN' className="col-span-3" />
-                                </div>
-                            </div>
-                            <DialogFooter>
-                                <Button type="submit">Find</Button>
-                            </DialogFooter>
-                        </form>
-                    </DialogContent>
-                </Dialog>
-                <Dialog open={uploadModalOpen} onOpenChange={toggleUploadModalOpen}>
-                    <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                            <DialogTitle>Tailwind Play</DialogTitle>
-                            <DialogDescription>
-                                Upsert Tailwind Play content.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <form onSubmit={handelUpload}>
-                            <div className="grid gap-4 py-4">
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Switch name='prodDb' id="prodDb" className='ml-auto' />
-                                    <Label htmlFor="prodDb" className='col-span-3'>Use Prod Db</Label>
-                                </div>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="accessKey" className='text-right'>Access Key</Label>
-                                    <Input id='accessKey' name='accessKey' placeholder='Access Key' type='text' required className='col-span-3' />
-                                </div>
-                            </div>
-                            <DialogFooter>
-                                <Button type="submit">Save</Button>
-                            </DialogFooter>
-                        </form>
-                    </DialogContent>
-                </Dialog>
+                <Find
+                    open={findModalOpen}
+                    onClose={() => toggleModalOpen(false)}
+                    setLoading={setLoading}
+                    handelFormat={handelFormat}
+                    setToken={(t) => setSearchedToken(t)}
+                />
+                <SaveAndUpload
+                    open={uploadModalOpen}
+                    handelFormat={handelFormat}
+                    onClose={() => toggleUploadModalOpen(false)}
+                    setLoading={setLoading}
+                    content={{ html: props.editorContent.html, css: props.editorContent.css }}
+                    token={searchedToken}
+                />
+                <Drawer open={drawerOpen} onClose={() => toggleDrawerOpen(false)}>
+                    <DrawerContent>
+                        <DrawerHeader>
+                            <DrawerTitle>View content</DrawerTitle>
+                            <DrawerDescription>Make it beautiful</DrawerDescription>
+                        </DrawerHeader>
+                        <div className='p-4'>
+                            <Display htmlContent={props.editorContent.html} cssContent={props.editorContent.css} />
+                        </div>
+                        <DrawerFooter className='flex justify-center'>
+                            <DrawerClose asChild>
+                                <Button variant="outline" className='w-fit'>Cancel</Button>
+                            </DrawerClose>
+                        </DrawerFooter>
+                    </DrawerContent>
+                </Drawer>
             </>
         )
     }
@@ -253,10 +159,8 @@ const EditorControls = (props: EditorControlsProps) => {
 }
 
 interface EditorControlsProps {
-    onSave: () => void;
-    onView: () => void;
-    editorContent: string;
-    setEditorContent: (c: string) => void
+    editorContent: ContentProps;
+    setEditorContent: (args: ContentProps) => void
 }
 
 export default EditorControls
