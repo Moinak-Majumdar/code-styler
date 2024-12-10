@@ -39,7 +39,7 @@ const SaveAndUpload = (props: Props) => {
             const formData = new FormData(form)
 
             const prodDb = formData.get('prodDb') === 'on'
-            const accessKey = formData.get('accessKey')
+            const accessKey = formData.get('accessKey')?.toString().trim()
             const { html, css } = props.content
 
             const server = new ServerData({ path: 'upsertTailwindPlay', testDb: !prodDb })
@@ -54,8 +54,13 @@ const SaveAndUpload = (props: Props) => {
                     position: 'bottom-left'
                 })
             } else {
-                toast('Content saved and uploaded.', { description: "Redirecting in few seconds ..." })
-                router.push(`/find/${json['token']}?tesDb=${!prodDb}`)
+                toast('Content saved and uploaded.', { 
+                    description: "Redirect to view content ...",
+                    action: {
+                        label: "Redirect",
+                        onClick: () => router.push(`/find/${json['token']}?testDb=${!prodDb}`)
+                    } 
+                })
             }
             props.setLoading(false)
         }

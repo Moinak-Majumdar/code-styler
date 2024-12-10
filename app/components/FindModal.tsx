@@ -13,7 +13,7 @@ import { toast } from 'sonner'
 import ContentProps from '../utils/Interface/ContentProps'
 import { ServerData } from '../utils/ServerData'
 
-export const Find = (props: Props) => {
+export const FindModal = (props: Props) => {
 
   const [prompt, setPrompt] = useState("")
   const [content, setContent] = useState<ContentProps>()
@@ -43,7 +43,7 @@ export const Find = (props: Props) => {
       const formData = new FormData(form)
 
       const prodDb = formData.get('prodDb') === 'on'
-      const token = formData.get('token')
+      const token = formData.get('token')?.toString().trim()
 
       try {
         const server = new ServerData({ path: 'getTailwindPlay', testDb: !prodDb })

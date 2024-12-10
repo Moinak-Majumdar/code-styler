@@ -11,7 +11,7 @@ import cssFormatter from '../utils/CssFormatter'
 import htmlFormatter from '../utils/HtmlFormatter'
 import ContentProps from '../utils/Interface/ContentProps'
 import Display from './Display'
-import { Find } from './Find'
+import { FindModal } from './FindModal'
 import Loading from './Loading'
 import SaveAndUpload from './SaveAndUpload'
 
@@ -29,6 +29,7 @@ const EditorControls = (props: EditorControlsProps) => {
             toast('Error ⚠️', {
                 description: 'HTML content is missing.',
                 position: 'bottom-left'
+                
             })
         } else {
             toggleUploadModalOpen(true)
@@ -121,7 +122,7 @@ const EditorControls = (props: EditorControlsProps) => {
                         </div>
                     </div>
                 </TooltipProvider >
-                <Find
+                <FindModal
                     open={findModalOpen}
                     onClose={() => toggleModalOpen(false)}
                     setLoading={setLoading}

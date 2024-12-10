@@ -10,7 +10,7 @@ const Token = async ({ params, searchParams }: { params: { token: string }, sear
     let testDb = true
     const queryParams = Object.keys(searchParams)
 
-    if(queryParams.includes('tesDb')) {
+    if (queryParams.includes('tesDb')) {
         testDb = searchParams['testDb']
     }
 
@@ -32,11 +32,15 @@ const Token = async ({ params, searchParams }: { params: { token: string }, sear
     loading = false
 
     return (
-        <main className="mt-16 flex justify-evenly">
-            <div className="p-4 max-w-[65vw] rounded shadow" style={poppins.style}>
-                {loading ? <Loading /> : <article className="h-fit w-full rounded-md border border-slate-800 dark:border-slate-500 py-4 px-2" dangerouslySetInnerHTML={{ __html: json['html'] }}></article>}
+        <main className="mt-16 w-full flex flex-col lg:flex-row justify-center lg:justify-evenly ">
+            {loading && <Loading />}
+            <div className="p-4 w-full lg:max-w-[65vw] rounded shadow" style={poppins.style}>
+                {json['css'] && <style>{json['css']}</style>}
+                <article className="h-fit w-full rounded-md border border-slate-800 dark:border-slate-500 py-4 px-2" dangerouslySetInnerHTML={{ __html: json['html'] }}></article>
             </div>
-            <Output token={json['token']} docId={json["_id"]} />
+            <div className="mx-auto lg:mx-0 py-4 px-2">
+                <Output token={json['token']} docId={json["_id"]} />
+            </div>
         </main>
     )
 }
