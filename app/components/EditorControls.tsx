@@ -14,9 +14,11 @@ import Display from './Display'
 import { FindModal } from './FindModal'
 import Loading from './Loading'
 import SaveAndUpload from './SaveAndUpload'
+import { useAppDispatch, useAppSelector } from '../redux/hooks'
+import { setContent, setCssContent, setHtmlContent } from '../redux/slice/content'
 
 
-const EditorControls = (props: EditorControlsProps) => {
+const EditorControls = () => {
 
     const [loading, setLoading] = useState<boolean>(false);
     const [drawerOpen, toggleDrawerOpen] = useState<boolean>(false);
@@ -24,31 +26,34 @@ const EditorControls = (props: EditorControlsProps) => {
     const [uploadModalOpen, toggleUploadModalOpen] = useState<boolean>(false)
     const [searchedToken, setSearchedToken] = useState<string>('')
 
+    const dispatch = useAppDispatch()
+    const { html, css } = useAppSelector((state) => state.contentSlice)
+
     const openUploadModal = () => {
-        if (props.editorContent.html.trim() === '') {
+        if (html.trim() === '') {
             toast('Error ⚠️', {
                 description: 'HTML content is missing.',
                 position: 'bottom-left'
-                
+
             })
         } else {
             toggleUploadModalOpen(true)
         }
     }
 
-    const handelFormat = async (content: ContentProps) => {
+    const handelFormat = async () => {
         setLoading(true)
         try {
-            const html = await htmlFormatter(content.html)
-            const css = await cssFormatter(content.css)
+            const h = await htmlFormatter(html)
+            const c = await cssFormatter(css)
 
-            props.setEditorContent({ html, css })
+            dispatch(setContent({ css: c, html: h }));
         } catch (error) {
             toast('Formatter error ⚠️', {
                 description: String(error),
                 position: 'bottom-left'
             })
-            props.setEditorContent({ html: "", css: "" });
+            dispatch(setContent({ css: "", html: "" }));
         }
         setLoading(false)
     }
@@ -56,7 +61,7 @@ const EditorControls = (props: EditorControlsProps) => {
 
     const handelReset = () => {
         setSearchedToken('')
-        props.setEditorContent({ css: "", html: '' })
+        dispatch(setContent({ css: "", html: "" }));
     }
 
 
@@ -76,7 +81,7 @@ const EditorControls = (props: EditorControlsProps) => {
                         <div className="flex gap-4">
                             <Tooltip>
                                 <TooltipTrigger
-                                    disabled={loading || props.editorContent.html.trim() === ''}
+                                    disabled={loading || html.trim() === ''}
                                     onClick={() => toggleDrawerOpen(true)}
                                     className='disabled:cursor-not-allowed'
                                 >
@@ -85,7 +90,7 @@ const EditorControls = (props: EditorControlsProps) => {
                                 <TooltipContent>Preview</TooltipContent>
                             </Tooltip>
                             <Tooltip>
-                                <TooltipTrigger onClick={() => handelFormat(props.editorContent)} disabled={loading} type="button">
+                                <TooltipTrigger onClick={handelFormat} disabled={loading} type="button">
                                     <LetterText className='hover:text-primary' />
                                     <TooltipContent>Format Code</TooltipContent>
                                 </TooltipTrigger>
@@ -127,15 +132,12 @@ const EditorControls = (props: EditorControlsProps) => {
                     onClose={() => toggleModalOpen(false)}
                     setLoading={setLoading}
                     handelFormat={handelFormat}
-                    setToken={(t) => setSearchedToken(t)}
                 />
                 <SaveAndUpload
                     open={uploadModalOpen}
-                    handelFormat={handelFormat}
                     onClose={() => toggleUploadModalOpen(false)}
                     setLoading={setLoading}
-                    content={{ html: props.editorContent.html, css: props.editorContent.css }}
-                    token={searchedToken}
+                    handelFormat={handelFormat}
                 />
                 <Drawer open={drawerOpen} onClose={() => toggleDrawerOpen(false)}>
                     <DrawerContent>
@@ -144,7 +146,7 @@ const EditorControls = (props: EditorControlsProps) => {
                             <DrawerDescription>Make it beautiful</DrawerDescription>
                         </DrawerHeader>
                         <div className='p-4'>
-                            <Display htmlContent={props.editorContent.html} cssContent={props.editorContent.css} />
+                            <Display htmlContent={html} cssContent={css} />
                         </div>
                         <DrawerFooter className='flex justify-center'>
                             <DrawerClose asChild>

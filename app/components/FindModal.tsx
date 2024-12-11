@@ -10,19 +10,21 @@ import { Tabs } from '@radix-ui/react-tabs'
 import { CloudDownload, DatabaseZap } from 'lucide-react'
 import { FormEvent, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import ContentProps from '../utils/Interface/ContentProps'
+import { useAppDispatch, useAppSelector } from '../redux/hooks'
+import { setContent, setSearchedToken } from '../redux/slice/content'
 import { ServerData } from '../utils/ServerData'
 
 export const FindModal = (props: Props) => {
 
+  const dispatch = useAppDispatch()
+  const { html, css, token } = useAppSelector((state) => state.contentSlice)
+
   const [prompt, setPrompt] = useState("")
-  const [content, setContent] = useState<ContentProps>()
 
   async function findLocal() {
     const local = localStorage.getItem('editor-content')
     if (!!local) {
       setPrompt("Content found in local storage..😁")
-      setContent(JSON.parse(local))
     } else {
       setPrompt('No content available in local storage.')
     }
@@ -32,11 +34,19 @@ export const FindModal = (props: Props) => {
     if (props.open) findLocal()
   }, [props.open])
 
+  function handelLoad() {
+    const local = localStorage.getItem('editor-content')
+    if (!!local) {
+      dispatch(setContent(JSON.parse(local)))
+      props.handelFormat()
+      props.onClose()
+    }
+  }
 
   async function findByToken(e: FormEvent) {
     e.preventDefault();
     props.setLoading(true);
-    props.onClose(false);
+    props.onClose();
 
     const form = e.target as HTMLFormElement
     if (form) {
@@ -51,7 +61,9 @@ export const FindModal = (props: Props) => {
 
         const json = await res.json();
         if (res.ok) {
-          props.handelFormat({ html: json['html'] ?? '', css: json['css'] ?? '' })
+          dispatch(setContent({ html: json['htm'] ?? "", css: json['css'] ?? "" }))
+          dispatch(setSearchedToken(json['token']))
+          props.handelFormat()
         } else {
           toast('Api Error ⚠️', {
             description: json['error'],
@@ -91,45 +103,41 @@ export const FindModal = (props: Props) => {
               <DialogFooter>
                 <Button
                   type="button"
-                  disabled={!!!content}
-                  onClick={() => {
-                    props.handelFormat(content!)
-                    props.onClose(false);
-                  }}
+                  disabled={!!!html}
+                  onClick={handelLoad}
                 >
-                  Load
-                </Button>
-              </DialogFooter>
-            </div>
-          </TabsContent>
-          <TabsContent value="cloud">
-            <form onSubmit={findByToken}>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Switch name='prodDb' id="prodDb" className='ml-auto' />
-                  <Label htmlFor="prodDb" className='col-span-3'>Use Prod Db</Label>
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="token" className="text-right">Token</Label>
-                  <Input required name='token' id="token" placeholder='TOKEN' className="col-span-3" />
-                </div>
+                Load
+              </Button>
+            </DialogFooter>
+          </div>
+        </TabsContent>
+        <TabsContent value="cloud">
+          <form onSubmit={findByToken}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Switch name='prodDb' id="prodDb" className='ml-auto' />
+                <Label htmlFor="prodDb" className='col-span-3'>Use Prod Db</Label>
               </div>
-              <DialogFooter>
-                <Button type="submit">Find</Button>
-              </DialogFooter>
-            </form>
-          </TabsContent>
-        </Tabs>
-      </DialogContent>
-    </Dialog>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="token" className="text-right">Token</Label>
+                <Input required name='token' id="token" placeholder='TOKEN' className="col-span-3" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="submit">Find</Button>
+            </DialogFooter>
+          </form>
+        </TabsContent>
+      </Tabs>
+    </DialogContent>
+    </Dialog >
   )
 }
 
 
 interface Props {
   open: boolean;
-  onClose: (val: boolean) => void;
+  onClose: () => void;
   setLoading: (l: boolean) => void;
-  handelFormat: (props: ContentProps) => void
-  setToken: (t: string) => void;
+  handelFormat: () => void
 }

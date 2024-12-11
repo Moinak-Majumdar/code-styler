@@ -3,23 +3,24 @@
 import { IconCSS, IconHTML } from '@/components/icon';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { autocompletion } from '@codemirror/autocomplete';
-import { css } from '@codemirror/lang-css';
-import { html } from '@codemirror/lang-html';
-import { less } from '@codemirror/lang-less';
+import { css as cssLang } from '@codemirror/lang-css';
+import { html as htmlLang } from '@codemirror/lang-html';
+import { less as lessLang } from '@codemirror/lang-less';
 import { andromeda } from '@uiw/codemirror-theme-andromeda';
 import { xcodeLight } from '@uiw/codemirror-theme-xcode';
 import CodeMirror, { ViewUpdate } from '@uiw/react-codemirror';
 import { Eye } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { useState } from 'react';
 import Display from './components/Display';
 import EditorControls from './components/EditorControls';
+import { useAppDispatch, useAppSelector } from './redux/hooks';
+import { setCssContent, setHtmlContent } from './redux/slice/content';
 
 
 export default function Home() {
 
-    const [htmlContent, setHtmlContent] = useState<string>("")
-    const [cssContent, setCssContent] = useState<string>("")
+    const dispatch = useAppDispatch()
+    const { css, html } = useAppSelector((state) => state.contentSlice)
 
     const { resolvedTheme } = useTheme()
 
@@ -34,10 +35,10 @@ export default function Home() {
                     </TabsList>
                     <TabsContent value="html">
                         <CodeMirror
-                            value={htmlContent}
+                            value={html}
                             extensions={extension1}
                             theme={resolvedTheme === 'dark' ? andromeda : xcodeLight}
-                            onChange={(value: string, viewUpdate: ViewUpdate) => setHtmlContent(value)}
+                            onChange={(value: string, viewUpdate: ViewUpdate) => dispatch(setHtmlContent(value))}
                             height="80vh"
                             width='full'
                             className="w-full"
@@ -45,10 +46,10 @@ export default function Home() {
                     </TabsContent>
                     <TabsContent value="css">
                         <CodeMirror
-                            value={cssContent}
+                            value={css}
                             extensions={extension2}
                             theme={resolvedTheme === 'dark' ? andromeda : xcodeLight}
-                            onChange={(value: string, viewUpdate: ViewUpdate) => setCssContent(value)}
+                            onChange={(value: string, viewUpdate: ViewUpdate) => dispatch(setCssContent(value))}
                             height="80vh"
                             width='full'
                             className="w-full"
@@ -56,16 +57,10 @@ export default function Home() {
                     </TabsContent>
                     <TabsContent value="view">
                         <div className='min-h-[80vh] w-full'>
-                            <Display htmlContent={htmlContent} cssContent={cssContent} />
+                            <Display htmlContent={html} cssContent={css} />
                         </div>
                     </TabsContent>
-                    <EditorControls
-                        editorContent={{ html: htmlContent, css: cssContent }}
-                        setEditorContent={(content) => {
-                            setHtmlContent(content.html)
-                            setCssContent(content.css)
-                        }}
-                    />
+                    <EditorControls/>
                 </Tabs>
             </section>
         </main>
@@ -73,7 +68,7 @@ export default function Home() {
 }
 
 const extension1 = [
-    html({
+    htmlLang({
         autoCloseTags: true,
         matchClosingTags: true,
         selfClosingTags: true
@@ -82,7 +77,7 @@ const extension1 = [
 ]
 
 const extension2 = [
-    css(),
-    less(),
+    cssLang(),
+    lessLang(),
     autocompletion(),
 ]

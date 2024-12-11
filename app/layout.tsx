@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 
 import { Navbar } from "./components/Navbar";
 import ThemeProvider from "./components/theme-provider";
-
+import { Redux } from "./redux/Redux";
 
 
 export const metadata: Metadata = {
@@ -19,11 +19,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" suppressHydrationWarning>
       <body>
         <ThemeProvider>
-          <>
+          <Redux>
             <Navbar />
             {children}
             <Toaster />
-          </>
+          </Redux>
         </ThemeProvider>
       </body>
     </html>

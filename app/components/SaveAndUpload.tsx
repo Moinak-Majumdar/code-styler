@@ -10,22 +10,24 @@ import { CloudUpload, DatabaseZap } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FormEvent } from "react";
 import { toast } from "sonner";
-import ContentProps from "../utils/Interface/ContentProps";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import { setSearchedToken } from "../redux/slice/content";
 import { ServerData } from "../utils/ServerData";
 
 
 
 const SaveAndUpload = (props: Props) => {
 
-    const router = useRouter()
+    const router = useRouter();
+    const { html, css, token } = useAppSelector((state) => state.contentSlice)
+    const dispatch = useAppDispatch()
 
     async function handelSave() {
-        props.handelFormat(props.content);
-        const content = JSON.stringify(props.content)
+        props.handelFormat()
+        const content = JSON.stringify({ html, css })
         localStorage.setItem('editor-content', content)
-
         toast('Content Saved ... ✅✅')
-        props.onClose(false)
+        props.onClose()
     }
 
     async function handelUpload(e: FormEvent) {
@@ -40,11 +42,10 @@ const SaveAndUpload = (props: Props) => {
 
             const prodDb = formData.get('prodDb') === 'on'
             const accessKey = formData.get('accessKey')?.toString().trim()
-            const { html, css } = props.content
 
             const server = new ServerData({ path: 'upsertTailwindPlay', testDb: !prodDb })
 
-            const res = await server.request({ body: { html, css, token: props.token, accessKey } })
+            const res = await server.request({ body: { html, css, token, accessKey } })
 
             const json = await res.json()
 
@@ -54,12 +55,13 @@ const SaveAndUpload = (props: Props) => {
                     position: 'bottom-left'
                 })
             } else {
-                toast('Content saved and uploaded.', { 
+                dispatch(setSearchedToken(undefined))
+                toast('Content saved and uploaded.', {
                     description: "Redirect to view content ...",
                     action: {
                         label: "Redirect",
                         onClick: () => router.push(`/find/${json['token']}?testDb=${!prodDb}`)
-                    } 
+                    }
                 })
             }
             props.setLoading(false)
@@ -114,11 +116,9 @@ const SaveAndUpload = (props: Props) => {
 
 interface Props {
     open: boolean;
-    onClose: (val: boolean) => void;
+    onClose: () => void;
     setLoading: (l: boolean) => void;
-    handelFormat: (props: ContentProps) => void
-    content: ContentProps,
-    token: string;
+    handelFormat: () => void
 }
 
 export default SaveAndUpload
