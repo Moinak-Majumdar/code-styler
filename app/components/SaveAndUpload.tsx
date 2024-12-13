@@ -22,7 +22,7 @@ const SaveAndUpload = (props: Props) => {
     const { html, css, token } = useAppSelector((state) => state.contentSlice)
     const dispatch = useAppDispatch()
 
-    async function handelSave() {
+    function handelSave() {
         props.handelFormat()
         const content = JSON.stringify({ html, css })
         localStorage.setItem('editor-content', content)
@@ -45,26 +45,28 @@ const SaveAndUpload = (props: Props) => {
 
             const server = new ServerData({ path: 'upsertTailwindPlay', testDb: !prodDb })
 
-            const res = await server.request({ body: { html, css, token, accessKey } })
+            console.table({ html, css, token })
 
-            const json = await res.json()
+            // const res = await server.request({ body: { html, css, token, accessKey } })
 
-            if (!res.ok) {
-                toast('Api Error ⚠️', {
-                    description: json['error'],
-                    position: 'bottom-left'
-                })
-            } else {
-                dispatch(setSearchedToken(undefined))
-                toast('Content saved and uploaded.', {
-                    description: "Redirect to view content ...",
-                    action: {
-                        label: "Redirect",
-                        onClick: () => router.push(`/find/${json['token']}?testDb=${!prodDb}`)
-                    }
-                })
-            }
-            props.setLoading(false)
+            // const json = await res.json()
+
+            // if (!res.ok) {
+            //     toast('Api Error ⚠️', {
+            //         description: json['error'],
+            //         position: 'bottom-left'
+            //     })
+            // } else {
+            //     dispatch(setSearchedToken(undefined))
+            //     toast('Content saved and uploaded.', {
+            //         description: "Redirect to view content ...",
+            //         action: {
+            //             label: "Redirect",
+            //             onClick: () => router.push(`/find/${json['token']}?testDb=${!prodDb}`)
+            //         }
+            //     })
+            // }
+            // props.setLoading(false)
         }
     }
 

@@ -16,15 +16,17 @@ const contentSlice = createSlice({
         setCssContent: (state, action: PayloadAction<string>) => {
             state.css = action.payload;
         },
-        setSearchedToken: (state, action: PayloadAction<string|undefined>) => {
+        setSearchedToken: (state, action: PayloadAction<string | undefined>) => {
             state.token = action.payload;
         },
-        setContent: (state, action: PayloadAction<{ css: string, html: string }>) => {
-            state.html = action.payload.html;
-            state.css = action.payload.css;
+        clearContentSlate: (state) => {
+            state.css = ""
+            state.html = ""
+            state.token = undefined
+            state._id = undefined
         }
     }
 })
 
 export default contentSlice;
-export const { setCssContent, setHtmlContent, setSearchedToken, setContent } = contentSlice.actions
+export const { setCssContent, setHtmlContent, setSearchedToken, clearContentSlate } = contentSlice.actions

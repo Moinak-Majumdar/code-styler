@@ -7,6 +7,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Eye, LetterText, ListRestart, Save, Search } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { useAppDispatch, useAppSelector } from '../redux/hooks'
+import { clearContentSlate, setCssContent, setHtmlContent } from '../redux/slice/content'
 import cssFormatter from '../utils/CssFormatter'
 import htmlFormatter from '../utils/HtmlFormatter'
 import ContentProps from '../utils/Interface/ContentProps'
@@ -14,8 +16,6 @@ import Display from './Display'
 import { FindModal } from './FindModal'
 import Loading from './Loading'
 import SaveAndUpload from './SaveAndUpload'
-import { useAppDispatch, useAppSelector } from '../redux/hooks'
-import { setContent, setCssContent, setHtmlContent } from '../redux/slice/content'
 
 
 const EditorControls = () => {
@@ -24,10 +24,9 @@ const EditorControls = () => {
     const [drawerOpen, toggleDrawerOpen] = useState<boolean>(false);
     const [findModalOpen, toggleModalOpen] = useState<boolean>(false)
     const [uploadModalOpen, toggleUploadModalOpen] = useState<boolean>(false)
-    const [searchedToken, setSearchedToken] = useState<string>('')
 
     const dispatch = useAppDispatch()
-    const { html, css } = useAppSelector((state) => state.contentSlice)
+    const { html, css, token } = useAppSelector((state) => state.contentSlice)
 
     const openUploadModal = () => {
         if (html.trim() === '') {
@@ -41,29 +40,23 @@ const EditorControls = () => {
         }
     }
 
+
     const handelFormat = async () => {
         setLoading(true)
         try {
             const h = await htmlFormatter(html)
             const c = await cssFormatter(css)
-
-            dispatch(setContent({ css: c, html: h }));
+            dispatch(setHtmlContent(h));
+            dispatch(setCssContent(c))
         } catch (error) {
             toast('Formatter error ⚠️', {
                 description: String(error),
                 position: 'bottom-left'
             })
-            dispatch(setContent({ css: "", html: "" }));
+            dispatch(clearContentSlate());
         }
         setLoading(false)
     }
-
-
-    const handelReset = () => {
-        setSearchedToken('')
-        dispatch(setContent({ css: "", html: "" }));
-    }
-
 
     if (loading) {
         return (<Loading />)
@@ -114,7 +107,9 @@ const EditorControls = () => {
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
                                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction onClick={handelReset}>Continue</AlertDialogAction>
+                                        <AlertDialogAction onClick={() => dispatch(clearContentSlate())}>
+                                            Continue
+                                        </AlertDialogAction>
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
                             </AlertDialog>
@@ -159,11 +154,6 @@ const EditorControls = () => {
         )
     }
 
-}
-
-interface EditorControlsProps {
-    editorContent: ContentProps;
-    setEditorContent: (args: ContentProps) => void
 }
 
 export default EditorControls

@@ -11,13 +11,13 @@ import { CloudDownload, DatabaseZap } from 'lucide-react'
 import { FormEvent, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useAppDispatch, useAppSelector } from '../redux/hooks'
-import { setContent, setSearchedToken } from '../redux/slice/content'
+import { setCssContent, setHtmlContent, setSearchedToken } from '../redux/slice/content'
 import { ServerData } from '../utils/ServerData'
 
 export const FindModal = (props: Props) => {
 
   const dispatch = useAppDispatch()
-  const { html, css, token } = useAppSelector((state) => state.contentSlice)
+  const { html } = useAppSelector((state) => state.contentSlice)
 
   const [prompt, setPrompt] = useState("")
 
@@ -37,10 +37,13 @@ export const FindModal = (props: Props) => {
   function handelLoad() {
     const local = localStorage.getItem('editor-content')
     if (!!local) {
-      dispatch(setContent(JSON.parse(local)))
+      const content = JSON.parse(local)
+      dispatch(setHtmlContent(content['html'] ?? ""))
+      dispatch(setCssContent(content['css'] ?? ""))
       props.handelFormat()
       props.onClose()
     }
+    return;
   }
 
   async function findByToken(e: FormEvent) {
@@ -61,7 +64,8 @@ export const FindModal = (props: Props) => {
 
         const json = await res.json();
         if (res.ok) {
-          dispatch(setContent({ html: json['htm'] ?? "", css: json['css'] ?? "" }))
+          dispatch(setHtmlContent(json['html'] ?? ""))
+          dispatch(setCssContent(json['css'] ?? ""))
           dispatch(setSearchedToken(json['token']))
           props.handelFormat()
         } else {
@@ -78,7 +82,6 @@ export const FindModal = (props: Props) => {
         })
       }
     }
-
     props.setLoading(false);
   }
 
@@ -103,33 +106,32 @@ export const FindModal = (props: Props) => {
               <DialogFooter>
                 <Button
                   type="button"
-                  disabled={!!!html}
                   onClick={handelLoad}
                 >
-                Load
-              </Button>
-            </DialogFooter>
-          </div>
-        </TabsContent>
-        <TabsContent value="cloud">
-          <form onSubmit={findByToken}>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Switch name='prodDb' id="prodDb" className='ml-auto' />
-                <Label htmlFor="prodDb" className='col-span-3'>Use Prod Db</Label>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="token" className="text-right">Token</Label>
-                <Input required name='token' id="token" placeholder='TOKEN' className="col-span-3" />
-              </div>
+                  Load
+                </Button>
+              </DialogFooter>
             </div>
-            <DialogFooter>
-              <Button type="submit">Find</Button>
-            </DialogFooter>
-          </form>
-        </TabsContent>
-      </Tabs>
-    </DialogContent>
+          </TabsContent>
+          <TabsContent value="cloud">
+            <form onSubmit={findByToken}>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Switch name='prodDb' id="prodDb" className='ml-auto' />
+                  <Label htmlFor="prodDb" className='col-span-3'>Use Prod Db</Label>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="token" className="text-right">Token</Label>
+                  <Input required name='token' id="token" placeholder='TOKEN' className="col-span-3" />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button type="submit">Find</Button>
+              </DialogFooter>
+            </form>
+          </TabsContent>
+        </Tabs>
+      </DialogContent>
     </Dialog >
   )
 }

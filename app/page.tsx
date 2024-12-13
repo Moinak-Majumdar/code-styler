@@ -15,14 +15,20 @@ import Display from './components/Display';
 import EditorControls from './components/EditorControls';
 import { useAppDispatch, useAppSelector } from './redux/hooks';
 import { setCssContent, setHtmlContent } from './redux/slice/content';
+import { useEffect } from 'react';
 
 
 export default function Home() {
 
     const dispatch = useAppDispatch()
-    const { css, html } = useAppSelector((state) => state.contentSlice)
+    const { css, html,token } = useAppSelector((state) => state.contentSlice)
 
     const { resolvedTheme } = useTheme()
+
+
+    useEffect(() => {
+        console.table([{ html, css, token }])
+    }, [html, css, token])
 
     return (
         <main className="flex">
@@ -39,7 +45,7 @@ export default function Home() {
                             extensions={extension1}
                             theme={resolvedTheme === 'dark' ? andromeda : xcodeLight}
                             onChange={(value: string, viewUpdate: ViewUpdate) => dispatch(setHtmlContent(value))}
-                            height="80vh"
+                            height="78vh"
                             width='full'
                             className="w-full"
                         />
@@ -50,7 +56,7 @@ export default function Home() {
                             extensions={extension2}
                             theme={resolvedTheme === 'dark' ? andromeda : xcodeLight}
                             onChange={(value: string, viewUpdate: ViewUpdate) => dispatch(setCssContent(value))}
-                            height="80vh"
+                            height="78vh"
                             width='full'
                             className="w-full"
                         />
