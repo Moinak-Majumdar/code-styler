@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import { setSearchedToken } from "../redux/slice/content";
 import { ServerData } from "../utils/ServerData";
+import ContentProps from "../utils/Interface/ContentProps";
 
 
 
@@ -23,7 +24,6 @@ const SaveAndUpload = (props: Props) => {
     const dispatch = useAppDispatch()
 
     function handelSave() {
-        props.handelFormat()
         const content = JSON.stringify({ html, css })
         localStorage.setItem('editor-content', content)
         toast('Content Saved ... ✅✅')
@@ -42,31 +42,28 @@ const SaveAndUpload = (props: Props) => {
 
             const prodDb = formData.get('prodDb') === 'on'
             const accessKey = formData.get('accessKey')?.toString().trim()
-
             const server = new ServerData({ path: 'upsertTailwindPlay', testDb: !prodDb })
 
-            console.table({ html, css, token })
+            const res = await server.request({ body: { html, css, token, accessKey } })
 
-            // const res = await server.request({ body: { html, css, token, accessKey } })
+            const json = await res.json()
 
-            // const json = await res.json()
-
-            // if (!res.ok) {
-            //     toast('Api Error ⚠️', {
-            //         description: json['error'],
-            //         position: 'bottom-left'
-            //     })
-            // } else {
-            //     dispatch(setSearchedToken(undefined))
-            //     toast('Content saved and uploaded.', {
-            //         description: "Redirect to view content ...",
-            //         action: {
-            //             label: "Redirect",
-            //             onClick: () => router.push(`/find/${json['token']}?testDb=${!prodDb}`)
-            //         }
-            //     })
-            // }
-            // props.setLoading(false)
+            if (!res.ok) {
+                toast('Api Error ⚠️', {
+                    description: json['error'],
+                    position: 'bottom-left'
+                })
+            } else {
+                dispatch(setSearchedToken(undefined))
+                toast('Content saved and uploaded.', {
+                    description: "Redirect to view content ...",
+                    action: {
+                        label: "Redirect",
+                        onClick: () => router.push(`/find/${json['token']}?testDb=${!prodDb}`)
+                    }
+                })
+            }
+            props.setLoading(false)
         }
     }
 
@@ -120,7 +117,7 @@ interface Props {
     open: boolean;
     onClose: () => void;
     setLoading: (l: boolean) => void;
-    handelFormat: () => void
+    handelFormat: (content: ContentProps) => void
 }
 
 export default SaveAndUpload

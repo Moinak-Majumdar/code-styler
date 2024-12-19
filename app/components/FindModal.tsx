@@ -13,6 +13,9 @@ import { toast } from 'sonner'
 import { useAppDispatch, useAppSelector } from '../redux/hooks'
 import { setCssContent, setHtmlContent, setSearchedToken } from '../redux/slice/content'
 import { ServerData } from '../utils/ServerData'
+import htmlFormatter from '../utils/HtmlFormatter'
+import cssFormatter from '../utils/CssFormatter'
+import ContentProps from '../utils/Interface/ContentProps'
 
 export const FindModal = (props: Props) => {
 
@@ -38,9 +41,7 @@ export const FindModal = (props: Props) => {
     const local = localStorage.getItem('editor-content')
     if (!!local) {
       const content = JSON.parse(local)
-      dispatch(setHtmlContent(content['html'] ?? ""))
-      dispatch(setCssContent(content['css'] ?? ""))
-      props.handelFormat()
+      props.handelFormat({html: content['html'] ?? "", css: content['css'] ?? ""})
       props.onClose()
     }
     return;
@@ -64,10 +65,8 @@ export const FindModal = (props: Props) => {
 
         const json = await res.json();
         if (res.ok) {
-          dispatch(setHtmlContent(json['html'] ?? ""))
-          dispatch(setCssContent(json['css'] ?? ""))
+          props.handelFormat({html: json['html'] ?? "", css: json['css'] ?? ""})
           dispatch(setSearchedToken(json['token']))
-          props.handelFormat()
         } else {
           toast('Api Error ⚠️', {
             description: json['error'],
@@ -141,5 +140,5 @@ interface Props {
   open: boolean;
   onClose: () => void;
   setLoading: (l: boolean) => void;
-  handelFormat: () => void
+  handelFormat: (content: ContentProps) => void
 }

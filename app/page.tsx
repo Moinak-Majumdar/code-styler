@@ -15,20 +15,14 @@ import Display from './components/Display';
 import EditorControls from './components/EditorControls';
 import { useAppDispatch, useAppSelector } from './redux/hooks';
 import { setCssContent, setHtmlContent } from './redux/slice/content';
-import { useEffect } from 'react';
 
 
 export default function Home() {
 
     const dispatch = useAppDispatch()
-    const { css, html,token } = useAppSelector((state) => state.contentSlice)
+    const { css, html } = useAppSelector((state) => state.contentSlice)
 
     const { resolvedTheme } = useTheme()
-
-
-    useEffect(() => {
-        console.table([{ html, css, token }])
-    }, [html, css, token])
 
     return (
         <main className="flex">
@@ -62,11 +56,11 @@ export default function Home() {
                         />
                     </TabsContent>
                     <TabsContent value="view">
-                        <div className='min-h-[80vh] w-full'>
+                        <div className='h-[78vh] w-full overflow-y-auto'>
                             <Display htmlContent={html} cssContent={css} />
                         </div>
                     </TabsContent>
-                    <EditorControls/>
+                    <EditorControls />
                 </Tabs>
             </section>
         </main>

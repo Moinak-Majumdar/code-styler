@@ -40,21 +40,27 @@ const EditorControls = () => {
         }
     }
 
-
-    const handelFormat = async () => {
+    const handelFormat = async (content: ContentProps) => {
         setLoading(true)
-        try {
-            const h = await htmlFormatter(html)
-            const c = await cssFormatter(css)
-            dispatch(setHtmlContent(h));
-            dispatch(setCssContent(c))
-        } catch (error) {
-            toast('Formatter error ⚠️', {
-                description: String(error),
+        htmlFormatter(content.html ?? "").then((h) => {
+            dispatch(setHtmlContent(h))
+        }).catch(err => {
+            toast('Html Formatter error ⚠️', {
+                description: String(err),
                 position: 'bottom-left'
             })
-            dispatch(clearContentSlate());
-        }
+            dispatch(setHtmlContent(""))
+        })
+
+        cssFormatter(content.css ?? "").then((c) => {
+            dispatch(setCssContent(c))
+        }).catch(err => {
+            toast('Css Formatter error ⚠️', {
+                description: String(err),
+                position: 'bottom-left'
+            })
+            dispatch(setCssContent(""))
+        })
         setLoading(false)
     }
 
@@ -83,7 +89,7 @@ const EditorControls = () => {
                                 <TooltipContent>Preview</TooltipContent>
                             </Tooltip>
                             <Tooltip>
-                                <TooltipTrigger onClick={handelFormat} disabled={loading} type="button">
+                                <TooltipTrigger onClick={() => handelFormat({ html, css })} disabled={loading} type="button">
                                     <LetterText className='hover:text-primary' />
                                     <TooltipContent>Format Code</TooltipContent>
                                 </TooltipTrigger>
