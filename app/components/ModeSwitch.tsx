@@ -10,9 +10,13 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useAppDispatch } from "@/redux/hooks"
+import { ThemeList } from "@/utils/ThemeList"
+import { changeEditorTheme } from "@/redux/slice/editorThemes"
 
 export function ModeSwitch() {
-    const { setTheme } = useTheme()
+    const { setTheme, resolvedTheme } = useTheme()
+    const dispatch = useAppDispatch()
 
     return (
         <DropdownMenu>
@@ -24,13 +28,39 @@ export function ModeSwitch() {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setTheme("light")}>
+                <DropdownMenuItem
+                    onClick={() => {
+                        setTheme("light")
+                        const theme = ThemeList.find(t => t.type === 'light' && t.isDefault === true)
+                        if (theme) {
+                            dispatch(changeEditorTheme(theme))
+                        }
+                    }}
+                >
                     Light
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("dark")}>
+                <DropdownMenuItem
+                    onClick={() => {
+                        setTheme("dark")
+                        const theme = ThemeList.find(t => t.type === 'dark' && t.isDefault === true)
+                        if (theme) {
+                            dispatch(changeEditorTheme(theme))
+                        }
+                    }}
+                >
                     Dark
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("system")}>
+                <DropdownMenuItem
+                    onClick={() => {
+                        setTheme("system")
+                        if (resolvedTheme) {
+                            const theme = ThemeList.find(t => t.type === resolvedTheme && t.isDefault === true)
+                            if (theme) {
+                                dispatch(changeEditorTheme(theme))
+                            }
+                        }
+                    }}
+                >
                     System
                 </DropdownMenuItem>
             </DropdownMenuContent>

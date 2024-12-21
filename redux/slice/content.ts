@@ -1,4 +1,4 @@
-import ContentProps from "@/app/utils/Interface/ContentProps";
+import ContentProps from "@/Interface/ContentProps";
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 const initial: ContentProps = {

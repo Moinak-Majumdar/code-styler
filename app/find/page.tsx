@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { IconCopy, IconSearch } from "../../components/icon";
 import Loading from "../components/Loading";
 import Output from "../components/QR";
-import { ServerData } from "../utils/ServerData";
+import { ServerData } from "@/utils/ServerData";
 const poppins = Poppins({ display: 'swap', weight: ['400', '500', '600', '700'], subsets: ['latin'] });
 
 

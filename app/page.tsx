@@ -2,25 +2,26 @@
 
 import { IconCSS, IconHTML } from '@/components/icon';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { setCssContent, setHtmlContent } from '@/redux/slice/content';
+import { getEditorTheme } from '@/utils/ThemeList';
 import { autocompletion } from '@codemirror/autocomplete';
 import { css as cssLang } from '@codemirror/lang-css';
 import { html as htmlLang } from '@codemirror/lang-html';
 import { less as lessLang } from '@codemirror/lang-less';
-import { andromeda } from '@uiw/codemirror-theme-andromeda';
-import { xcodeLight } from '@uiw/codemirror-theme-xcode';
 import CodeMirror, { ViewUpdate } from '@uiw/react-codemirror';
 import { Eye } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Display from './components/Display';
 import EditorControls from './components/EditorControls';
-import { useAppDispatch, useAppSelector } from './redux/hooks';
-import { setCssContent, setHtmlContent } from './redux/slice/content';
+
 
 
 export default function Home() {
 
     const dispatch = useAppDispatch()
     const { css, html } = useAppSelector((state) => state.contentSlice)
+    const { selectedTheme } = useAppSelector((state) => state.editorThemeSlice)
 
     const { resolvedTheme } = useTheme()
 
@@ -37,9 +38,9 @@ export default function Home() {
                         <CodeMirror
                             value={html}
                             extensions={extension1}
-                            theme={resolvedTheme === 'dark' ? andromeda : xcodeLight}
+                            theme={getEditorTheme(resolvedTheme ?? 'light', selectedTheme?.label)}
                             onChange={(value: string, viewUpdate: ViewUpdate) => dispatch(setHtmlContent(value))}
-                            height="78vh"
+                            height="76vh"
                             width='full'
                             className="w-full"
                         />
@@ -48,15 +49,15 @@ export default function Home() {
                         <CodeMirror
                             value={css}
                             extensions={extension2}
-                            theme={resolvedTheme === 'dark' ? andromeda : xcodeLight}
+                            theme={getEditorTheme(resolvedTheme ?? 'light', selectedTheme?.label)}
                             onChange={(value: string, viewUpdate: ViewUpdate) => dispatch(setCssContent(value))}
-                            height="78vh"
+                            height="76vh"
                             width='full'
                             className="w-full"
                         />
                     </TabsContent>
                     <TabsContent value="view">
-                        <div className='h-[78vh] w-full overflow-y-auto'>
+                        <div className='h-[76vh] w-full overflow-y-auto'>
                             <Display htmlContent={html} cssContent={css} />
                         </div>
                     </TabsContent>

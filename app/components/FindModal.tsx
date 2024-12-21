@@ -10,12 +10,11 @@ import { Tabs } from '@radix-ui/react-tabs'
 import { CloudDownload, DatabaseZap } from 'lucide-react'
 import { FormEvent, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { useAppDispatch, useAppSelector } from '../redux/hooks'
-import { setCssContent, setHtmlContent, setSearchedToken } from '../redux/slice/content'
-import { ServerData } from '../utils/ServerData'
-import htmlFormatter from '../utils/HtmlFormatter'
-import cssFormatter from '../utils/CssFormatter'
-import ContentProps from '../utils/Interface/ContentProps'
+import { useAppDispatch, useAppSelector } from '@/redux/hooks'
+import { ServerData } from '@/utils/ServerData'
+import { setSearchedToken } from '@/redux/slice/content'
+import ContentProps from '@/Interface/ContentProps'
+
 
 export const FindModal = (props: Props) => {
 
@@ -89,7 +88,7 @@ export const FindModal = (props: Props) => {
     <Dialog open={props.open} onOpenChange={props.onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Tailwind Play</DialogTitle>
+          <DialogTitle>Code Styler</DialogTitle>
           <DialogDescription>
             Find html by registered token and edit in editor.
           </DialogDescription>

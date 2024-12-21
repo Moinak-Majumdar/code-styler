@@ -8,7 +8,7 @@ class ServerData {
         const admin = process.env.NEXT_PUBLIC_DB_ADMIN;
 
         this.uri = `${server}/${params.path}?testDb=${params.testDb}&dbAdmin=${admin}`
-        this.revalidate = params.revalidate ?? 3600;
+        this.revalidate = params.revalidate ?? 0;
     }
 
     async request(params: { body: object } = { body: {} }): Promise<Response> {

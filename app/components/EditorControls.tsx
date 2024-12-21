@@ -4,14 +4,14 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Button } from '@/components/ui/button'
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from '@/components/ui/drawer'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import ContentProps from '@/Interface/ContentProps'
+import { useAppDispatch, useAppSelector } from '@/redux/hooks'
+import { clearContentSlate, setCssContent, setHtmlContent } from '@/redux/slice/content'
+import cssFormatter from '@/utils/CssFormatter'
+import htmlFormatter from '@/utils/HtmlFormatter'
 import { Eye, LetterText, ListRestart, Save, Search } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { useAppDispatch, useAppSelector } from '../redux/hooks'
-import { clearContentSlate, setCssContent, setHtmlContent } from '../redux/slice/content'
-import cssFormatter from '../utils/CssFormatter'
-import htmlFormatter from '../utils/HtmlFormatter'
-import ContentProps from '../utils/Interface/ContentProps'
 import Display from './Display'
 import { FindModal } from './FindModal'
 import Loading from './Loading'
@@ -70,7 +70,7 @@ const EditorControls = () => {
         return (
             <>
                 <TooltipProvider>
-                    <div className="mt-4 flex justify-between px-8 w-full">
+                    <div className="flex justify-between px-8 w-full py-4">
                         <Tooltip>
                             <TooltipTrigger disabled={loading} type="button" onClick={() => toggleModalOpen(true)}>
                                 <Search className='hover:text-primary' />
@@ -141,7 +141,7 @@ const EditorControls = () => {
                     handelFormat={handelFormat}
                 />
                 <Drawer open={drawerOpen} onClose={() => toggleDrawerOpen(false)}>
-                    <DrawerContent>
+                    <DrawerContent className=''>
                         <DrawerHeader>
                             <DrawerTitle>View content</DrawerTitle>
                             <DrawerDescription>Make it beautiful</DrawerDescription>

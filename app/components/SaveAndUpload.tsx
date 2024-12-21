@@ -4,16 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ContentProps from "@/Interface/ContentProps";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { setSearchedToken } from "@/redux/slice/content";
+import { ServerData } from "@/utils/ServerData";
 import { CloudUpload, DatabaseZap } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FormEvent } from "react";
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "../redux/hooks";
-import { setSearchedToken } from "../redux/slice/content";
-import { ServerData } from "../utils/ServerData";
-import ContentProps from "../utils/Interface/ContentProps";
 
 
 
@@ -42,9 +43,15 @@ const SaveAndUpload = (props: Props) => {
 
             const prodDb = formData.get('prodDb') === 'on'
             const accessKey = formData.get('accessKey')?.toString().trim()
+            const insertOption = formData.get('insertOption')
             const server = new ServerData({ path: 'upsertTailwindPlay', testDb: !prodDb })
 
-            const res = await server.request({ body: { html, css, token, accessKey } })
+            const res = await server.request({
+                body: {
+                    html, css, accessKey,
+                    ...token === insertOption && { token }
+                }
+            })
 
             const json = await res.json()
 
@@ -71,9 +78,9 @@ const SaveAndUpload = (props: Props) => {
         <Dialog open={props.open} onOpenChange={props.onClose}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Tailwind Play</DialogTitle>
+                    <DialogTitle>Code Styler</DialogTitle>
                     <DialogDescription>
-                        Upsert Tailwind Play content.
+                        Upsert code styler content.
                     </DialogDescription>
                 </DialogHeader>
                 <Tabs defaultValue="local" className='w-full'>
@@ -96,6 +103,18 @@ const SaveAndUpload = (props: Props) => {
                                     <Switch name='prodDb' id="prodDb" className='ml-auto' />
                                     <Label htmlFor="prodDb" className='col-span-3'>Use Prod Db</Label>
                                 </div>
+                                {!!token &&
+                                    <RadioGroup className="ml-16 flex gap-x-4 items-center" name="insertOption" defaultValue={token}>
+                                        <div className="flex items-center space-x-4">
+                                            <RadioGroupItem value={token} id={token} />
+                                            <Label htmlFor={token}>Use: {token}</Label>
+                                        </div>
+                                        <div className="flex items-center space-x-4">
+                                            <RadioGroupItem value="fresh" id="fresh" />
+                                            <Label htmlFor="fresh">Insert fresh</Label>
+                                        </div>
+                                    </RadioGroup>
+                                }
                                 <div className="grid grid-cols-4 items-center gap-4">
                                     <Label htmlFor="accessKey" className='text-right'>Access Key</Label>
                                     <Input id='accessKey' name='accessKey' placeholder='Access Key' type='text' required className='col-span-3' />
