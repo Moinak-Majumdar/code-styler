@@ -1,4 +1,4 @@
-import { IconProps } from '@/app/utils/Interface/IconProps'
+import { IconProps } from '@/Interface/IconProps'
 
 const IconCSS = (props: IconProps) => {
     return (
